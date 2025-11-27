@@ -1,100 +1,59 @@
-# wazo-docker
+# Wazo PBX Docker Stack
 
-## **WARNING**: Everything in this repo is experimental and not ready for the production
+This is a Portainer-compatible Docker Compose stack for Wazo PBX, configured for:
+- **Zadarma SIP Trunking**
+- **Node.js AI Receptionist Integration** (via ARI)
+- **Android SIP Extensions** (via Wazo UI)
 
-Contains docker-compose file to setup wazo-platform project.
+## Prerequisites
+- Docker & Docker Compose
+- Portainer (optional, but recommended)
+- Git
 
-The main goal of this repository is to list and document what we need to have
-container ready services. In other word, when this repository will contains only
-a docker-compose without hacks (volumes, custom images, etc..), then we will
-have container ready services
+## Deployment
 
-## Prerequisite
+### Option 1: Portainer (Git Stack)
+1.  In Portainer, go to **Stacks** > **Add stack**.
+2.  Select **Repository**.
+3.  Enter the URL of your GitHub repository containing these files.
+4.  **Important**: Ensure `LOCAL_GIT_REPOS` is set in the Environment variables section of the stack, or use the `.env` file.
+    - If deploying from Git, Portainer might not handle relative paths in `volumes` correctly if the submodules aren't checked out.
+    - **Recommended**: Clone this repo to your server manually, then use **Local** stack in Portainer pointing to the `docker-compose.yml`.
 
-- Install docker
-- Clone the following repositories
-  - wazo-platform/wazo-auth-keys
-  - wazo-platform/xivo-config
+### Option 2: Manual Deployment
+1.  Clone this repository:
+    ```bash
+    git clone <your-repo-url> wazo-pbx
+    cd wazo-pbx
+    ```
+2.  Ensure submodules/dependencies are present (the `wazo-auth-keys` and `xivo-config` directories).
+3.  Run:
+    ```bash
+    docker compose up -d
+    ```
 
-- set environment variable `LOCAL_GIT_REPOS=<path/to/cloned/repositories>`
+## Configuration
 
-## Prepare Environment
+### 1. Zadarma SIP Trunk
+Your credentials are in `.env` for reference.
+To configure the trunk in Wazo:
+1.  Log in to **Wazo UI** (https://<your-ip>:8443). Default creds: `root` / `secret` (or check `variables.env`).
+2.  Go to **Trunks** > **SIP Protocol**.
+3.  Create a new trunk:
+    - **Authentication Username**: `04188`
+    - **Password**: `kK3mMoBmZ0`
+    - **Server**: `sip.zadarma.com`
+    - **Register**: Yes
 
-- `for repo in wazo-auth-keys xivo-config; do git -C "$LOCAL_GIT_REPOS/$repo" pull; done`
-- `docker compose pull --ignore-pull-failures`
-  - Note: A lot of images won't be found on registry since they are built locally
+### 2. Node.js AI Integration
+Your Node.js app can connect to Asterisk ARI using:
+- **URL**: `http://<wazo-ip>:5039/ari`
+- **WebSocket**: `ws://<wazo-ip>:8088/ari/events`
+- **Username**: `wazo-user`
+- **Password**: `wazo-password` (Change this in `etc/asterisk-ari.conf`)
 
-- `docker compose build --pull --no-cache`
-
-### Use Development Branch Environment
-
-If you want to use a feature in development. You can override docker image from
-a local folder with the following steps:
-
-- `cd /<path>/<to>/wazo-<service>/`
-- `docker build -t wazoplatform/wazo-<service>:latest .`
-- `cd /<path>/<to>/wazo-docker/`
-- `docker compose build <service> --no-cache`
-- `docker compose up -d`
-
-> **Where `<service>` can be**: `asterisk`, `bootstrap`, `chatd`, `confd`,
-> `dird`, `provd`, `webhookd`, `websocketd`, `auth`, `deployd`
-
-## Start Environment
-
-- `docker compose up --detach`
-- Need to accept custom certificate on `https://localhost:8443`
-- default username / password: `root` / `secret`
-
-## Clean Environment
-
-- `docker compose down --volumes`
-- `docker compose up --detach`
-
-## Restart Environment
-
-- `docker compose down`
-- `docker compose up --detach`
-
-## Test Environment
-
-- Install `curl` and `jq` commands
-- `./verify.sh`
-
-## Troubleshooting
-
-- A good starting point for debugging is the `bootstrap` container log
-- To get sql prompt: `docker compose exec postgres psql -U asterisk wazo`
-- To use wazo-auth-cli: `docker compose run --entrypoint bash bootstrap`
-- To update only one service without restarting everything
-
-  ```bash
-  docker compose stop webhookd
-  docker compose rm webhookd
-  docker compose up webhookd
-  ```
-
-- **Avoid to use `docker compose restart <service>`**. It will only restart
-  container without new parameters (mount, config, variable)
-- When running softphone on the same host than docker, don't use 127.0.0.1:5060,
-  but use *public* IP (i.e. 192.168.x.x:5060)
-- asterisk configuration are not reload automatically. You must:
-
-  ```bash
-  docker compose exec asterisk bash
-  wazo-confgen asterisk/pjsip.conf --invalidate
-  asterisk -rx 'core reload'
-  ```
-
-## Security
-
-This project has not been developed to be used on production nor exposed on
-internet. Here is a non-exhaustive list of security concerns that has been found
-during development:
-
-- wazo-phoned expose all unsecured endpoints through nginx
-- nginx configuration can be updated on upstream and be desynchronized with this
-  configuration
-- Container images embed the `netcat` tool that can be used to open a remote
-  shell.
-- Credentials are hardcoded
+### 3. Android Extensions
+1.  In Wazo UI, go to **Users**.
+2.  Create a user.
+3.  Add a **Line** (SIP).
+4.  Use the generated credentials (Username/Password) in your Android SIP client (e.g., Zoiper, GS Wave).
