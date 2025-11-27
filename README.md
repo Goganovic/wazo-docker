@@ -16,9 +16,12 @@ This is a Portainer-compatible Docker Compose stack for Wazo PBX, configured for
 1.  In Portainer, go to **Stacks** > **Add stack**.
 2.  Select **Repository**.
 3.  Enter the URL of your GitHub repository containing these files.
-4.  **Important**: Ensure `LOCAL_GIT_REPOS` is set in the Environment variables section of the stack, or use the `.env` file.
-    - If deploying from Git, Portainer might not handle relative paths in `volumes` correctly if the submodules aren't checked out.
-    - **Recommended**: Clone this repo to your server manually, then use **Local** stack in Portainer pointing to the `docker-compose.yml`.
+4.  **Important**: Since `.env` is not in the repo (for security), you must manually set the Environment variables in Portainer:
+    - `LOCAL_GIT_REPOS`: `.`
+    - `SIP_USERNAME`: `04188`
+    - `SIP_PASSWORD`: `kK3mMoBmZ0`
+    - `SIP_DOMAIN`: `sip.zadarma.com`
+    - **Recommended**: Clone this repo to your server manually, create a `.env` file from `.env.example`, and use **Local** stack in Portainer.
 
 ### Option 2: Manual Deployment
 1.  Clone this repository:
@@ -26,8 +29,13 @@ This is a Portainer-compatible Docker Compose stack for Wazo PBX, configured for
     git clone <your-repo-url> wazo-pbx
     cd wazo-pbx
     ```
-2.  Ensure submodules/dependencies are present (the `wazo-auth-keys` and `xivo-config` directories).
-3.  Run:
+2.  Copy the example environment file:
+    ```bash
+    cp .env.example .env
+    ```
+3.  Edit `.env` and add your Zadarma credentials.
+4.  Ensure submodules/dependencies are present.
+5.  Run:
     ```bash
     docker compose up -d
     ```
