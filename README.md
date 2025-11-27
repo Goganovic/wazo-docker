@@ -18,8 +18,8 @@ This is a Portainer-compatible Docker Compose stack for Wazo PBX, configured for
 3.  Enter the URL of your GitHub repository containing these files.
 4.  **Important**: Since `.env` is not in the repo (for security), you must manually set the Environment variables in Portainer:
     - `LOCAL_GIT_REPOS`: `.`
-    - `SIP_USERNAME`: `04188`
-    - `SIP_PASSWORD`: `kK3mMoBmZ0`
+    - `SIP_USERNAME`: `your_sip_username`
+    - `SIP_PASSWORD`: `your_sip_password`
     - `SIP_DOMAIN`: `sip.zadarma.com`
     - **Recommended**: Clone this repo to your server manually, create a `.env` file from `.env.example`, and use **Local** stack in Portainer.
 
@@ -48,8 +48,8 @@ To configure the trunk in Wazo:
 1.  Log in to **Wazo UI** (https://<your-ip>:8443). Default creds: `root` / `secret` (or check `variables.env`).
 2.  Go to **Trunks** > **SIP Protocol**.
 3.  Create a new trunk:
-    - **Authentication Username**: `04188`
-    - **Password**: `kK3mMoBmZ0`
+    - **Authentication Username**: `your_sip_username`
+    - **Password**: `your_sip_password`
     - **Server**: `sip.zadarma.com`
     - **Register**: Yes
 
@@ -58,7 +58,7 @@ Your Node.js app can connect to Asterisk ARI using:
 - **URL**: `http://<wazo-ip>:5039/ari`
 - **WebSocket**: `ws://<wazo-ip>:8088/ari/events`
 - **Username**: `wazo-user`
-- **Password**: `wazo-password` (Change this in `etc/asterisk-ari.conf`)
+- **Password**: `change_this_password` (Change this in `etc/asterisk-ari.conf`)
 
 ### 3. Android Extensions
 1.  In Wazo UI, go to **Users**.
